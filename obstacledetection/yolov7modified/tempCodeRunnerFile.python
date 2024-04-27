@@ -1,4 +1,0 @@
-half = device.type != 'cpu'  # half precision only supported on CUDA  
-# Load model
-print(device)
-model = attempt_load(weights, map_location=device)
