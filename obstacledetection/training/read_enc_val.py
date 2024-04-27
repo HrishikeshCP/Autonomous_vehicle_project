@@ -1,4 +1,4 @@
-import serial
+import serial_mon
 def write_to_text_file(file_path, value):
     try:
         # Open the file in append mode
@@ -11,7 +11,7 @@ def write_to_text_file(file_path, value):
 def listen_to_serial(port, baudrate=115200):
     try:
         # Open the serial port
-        ser = serial.Serial(port, baudrate, timeout=1)
+        ser = serial_mon.Serial(port, baudrate, timeout=1)
         print(f"Listening to {port} at {baudrate} baudrate. Press Ctrl+C to stop.")
 
         while True:
@@ -22,7 +22,7 @@ def listen_to_serial(port, baudrate=115200):
             print(str(line))
             write_to_text_file("data.txt", str(line))
 
-    except serial.SerialException as e:
+    except serial_mon.SerialException as e:
         print(f"Error: {e}")
 
     finally:

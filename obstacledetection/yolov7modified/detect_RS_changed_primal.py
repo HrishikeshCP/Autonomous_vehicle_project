@@ -39,7 +39,7 @@ def detect(save_img=False):
     # Load model
     print(device)
     model = attempt_load(weights, map_location=device)  # load FP32 model
-    # model = attempt_load(weights,pt, map_location=torch.device('cpu')) 
+    # model = attempt_load(weights, map_location=torch.device('cpu')) 
     #problem^^^^^^^^^^^^^^^^^^^^
     stride = int(model.stride.max())  # model stride
     imgsz = check_img_size(imgsz, s=stride)  # check img_size
@@ -77,6 +77,7 @@ def detect(save_img=False):
 
     # Set colorizer options
 
+
     while(True):
         #t0 = time.time()
         frames = pipeline.wait_for_frames()
@@ -97,7 +98,10 @@ def detect(save_img=False):
         depth_colormap = np.asanyarray(colorized_frame.get_data())
         # Letterbox
         im0 = img.copy()
-        img = img[np.newaxis, :, :, :]        
+        img = img[np.newaxis, :, :, :]   
+
+        # Create a zero mask image
+        im0_masked = np.zeros_like(im0)     
 
         # Stack
         img = np.stack(img, 0)
@@ -152,6 +156,9 @@ def detect(save_img=False):
                     plot_one_box(xyxy, depth_colormap, label=label, color=colors[int(cls)], line_thickness=2)
 
                 for *xyxy, _, _ in det:
+                    # Draw bounding boxes on the zero mask image
+                    cv2.rectangle(im0_masked, (int(xyxy[0]), int(xyxy[1])), (int(xyxy[2]), int(xyxy[3])), (255, 255, 255), -1)
+
                     # Calculate center coordinates of the detected object
                     x_center = (xyxy[0] + xyxy[2]) / 2
                     y_center = (xyxy[1] + xyxy[3]) / 2
@@ -172,6 +179,7 @@ def detect(save_img=False):
             # Stream results
             cv2.imshow("Recognition result", im0)
             cv2.imshow("Recognition result depth",depth_colormap)
+            cv2.imshow("Masked frame", im0_masked)  # Display the masked image
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
 

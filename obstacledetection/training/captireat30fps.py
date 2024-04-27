@@ -1,6 +1,6 @@
 import cv2
 import os
-import serial
+import serial_mon
 from time import sleep
 import csv
 
@@ -8,7 +8,7 @@ import csv
 def listen_to_serial(port='com4', baudrate=115200):
     # try:
         # Open the serial port
-        ser = serial.Serial(port, baudrate)
+        ser = serial_mon.Serial(port, baudrate)
         # while True:
             # Read a line from the serial port
         line = ser.readline().decode('utf-8').strip()

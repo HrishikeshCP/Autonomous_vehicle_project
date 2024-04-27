@@ -1,0 +1,14 @@
+from models.yolo import Model
+
+device = select_device(opt.device)
+half = device.type != 'cpu'  # half precision only supported on CUDA  
+# Load model
+print(device)
+model = attempt_load(weights, map_location=device)
+
+# Get the class names
+class_names = model.names
+
+# Print the class names and their corresponding indices
+for i, class_name in enumerate(class_names):
+    print(f"Class {i}: {class_name}")

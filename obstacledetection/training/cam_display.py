@@ -1,9 +1,9 @@
 import cv2
-import serial
+import serial_mon
 from time import sleep
 
 # Enter your COM port in the below line
-ard = serial.Serial('com4', 115200)
+ard = serial_mon.Serial('com4', 115200)
 sleep(2)
 print(ard.readline(ard.inWaiting()))
 
