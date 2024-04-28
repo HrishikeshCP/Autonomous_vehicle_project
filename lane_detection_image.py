@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 
 # Load the image
-frame = cv2.imread('Segformer/img and vdos/final road (Custom).jpg')  # Replace 'your_image.jpg' with the path to your image
+frame = cv2.imread('obstacledetection/yolov7modified/final road (Custom).jpg')  # Replace 'your_image.jpg' with the path to your image
 
 def canny(img):
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -55,8 +55,8 @@ def display_filled_region(img, lines, init_point):
         pts2 = pts2.reshape((-1, 1, 2))
 
         pts = pts.reshape((-1, 1, 2))
-        image = cv2.fillPoly(mask, [pts], (144, 238, 144))  # Light green color
-        image = cv2.fillPoly(mask, [pts2], (144, 238, 144))  # Light green color
+        image = cv2.fillPoly(img_copy, [pts], (144, 238, 144))  # Light green color
+        image = cv2.fillPoly(img_copy, [pts2], (144, 238, 144))  # Light green color
         
     return image
 

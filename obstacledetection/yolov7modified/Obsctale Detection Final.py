@@ -19,7 +19,7 @@ import numpy as np
 import serial
 import time
 
-ser = serial.Serial('COM8', 9600)
+ser = serial.Serial('COM11', 9600)
 
 
 frame = cv2.imread('obstacledetection/yolov7modified/final road (Custom).jpg')  # Replace 'your_image.jpg' with the path to your image
@@ -72,8 +72,11 @@ def display_filled_region(img, lines, init_point):
         pts2 = pts2.reshape((-1, 1, 2))
 
         pts = pts.reshape((-1, 1, 2))
-        image = cv2.fillPoly(mask, [pts], (144, 238, 144))  # Light green color
-        image = cv2.fillPoly(mask, [pts2], (144, 238, 144))  # Light green color
+        # image = cv2.fillPoly(img_copy, [pts], (144, 238, 144))  # Light green color
+        # image = cv2.fillPoly(img_copy, [pts2], (144, 238, 144))  # Light green color
+        
+        image = cv2.polylines(img_copy, [pts], isClosed=True, color=(144, 238, 144), thickness=2)
+        image = cv2.polylines(img_copy, [pts2], isClosed=True, color=(144, 238, 144), thickness=2) 
 
     return image
 
@@ -280,7 +283,12 @@ def detection():
             frames = pipeline.wait_for_frames()
             # if color_frame is not None:
             #     color_image = color_image.reshape((480, 640, 3))
-            lane_masked_image = lane_detection(img)
+
+
+            # lane_masked_image = lane_detection(img)   #for live frame
+            lane_masked_image = lane_detection(frame) #for fixed frame
+            
+            
             # cv2.imshow("color frame", color_frame)
 
             # Convert the colorized frame to a numpy array
@@ -373,13 +381,16 @@ def detection():
 
                             # Get depth data within the bounding box
                             depth_region = depth_data[y1:y2, x1:x2]
-
-                            if depth_region.size > 0:
+                            
+                            if np.count_nonzero(depth_region) > 0:
                                 # Calculate the minimum distance within the bounding box
                                 object_min_distance = np.min(depth_region[depth_region != 0]) * 0.001
-                                
-                                # Add the distance to the list
                                 object_distances.append(object_min_distance)
+                            
+                            else:
+                                object_min_distance = float('inf')
+
+                                # Add the distance to the list
 
                     # After iterating through all detected objects, find the minimum distance
                     if object_distances:
