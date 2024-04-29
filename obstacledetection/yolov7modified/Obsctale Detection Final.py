@@ -19,11 +19,12 @@ import numpy as np
 import serial
 import time
 
-ser = serial.Serial('COM11', 9600)
+ser = serial.Serial('COM8', 9600)
 
 
-frame = cv2.imread('obstacledetection/yolov7modified/final road (Custom).jpg')  # Replace 'your_image.jpg' with the path to your image
-
+frame = cv2.imread('obstacledetection/yolov7modified/snakeroad.jpg')  # Replace 'your_image.jpg' with the path to your image
+# cv2.imshow("frame",frame)
+frame = cv2.resize(frame, (640, 480))
 
 def canny(img):
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -148,9 +149,57 @@ def average_slope_intercept(img,lines):
     return average_lines
 
 
+# def average_slope_intercept_with_centre(img, lines):
+#     # lower_value_slope = 0.5
+#     # higher_value_slope = 3
+#     lower_value_slope = 0.5
+#     higher_value_slope = 2.5
+#     flag_left = True
+#     flag_right = True
+#     left_fit = []
+#     right_fit = []
+#     for line in lines:
+#         for x1,y1,x2,y2 in line:
+#             if (type(x1)==None or type(y1)==None or type(x2)==None or type(y2)==None):
+#                 continue
+#             fit = np.polyfit((x1,x2),(y1,y2),1)
+#             slope = fit[0]
+#             intercept = fit[1]
+#             # print(intercept,slope)
+#             if slope < -lower_value_slope and slope >= -higher_value_slope:
+#                 left_fit.append((slope, intercept))
+#             elif slope >= lower_value_slope and slope <= higher_value_slope :
+#                 right_fit.append((slope,intercept))
+#     if left_fit == []:
+#         # left_fit = np.array([(0.0001,0.0001)])
+#         flag_left = False
+#     if right_fit == []:
+#         # right_fit = np.array([(0.0001,0.0001)])
+#         flag_right = False
+
+#     if flag_left:
+#         left_fit_average = np.average(left_fit,axis=0)
+#         left_line = make_points(img, left_fit_average)
+#     else:
+#         left_line = np.array([[None,None,None,None]])
+
+#     if flag_right:
+#         right_fit_average = np.average(right_fit,axis=0)
+#         right_line = make_points(img, right_fit_average)
+#     else:
+#         right_line = np.array([[None,None,None,None]])
+
+#     if flag_left and flag_right:
+#         center_line = np.array([[0,0,0,0]])
+#         for i in range(4):
+#             center_line[0][i] = np.int32((left_line[0][i] + right_line[0][i])/2)
+#     else:
+#         center_line = np.array([[None,None,None,None]])
+
+#     average_lines = [np.array(left_line),np.array(right_line),np.array(center_line)]
+#     return average_lines
+
 def average_slope_intercept_with_centre(img, lines):
-    # lower_value_slope = 0.5
-    # higher_value_slope = 3
     lower_value_slope = 0.5
     higher_value_slope = 2.5
     flag_left = True
@@ -158,43 +207,45 @@ def average_slope_intercept_with_centre(img, lines):
     left_fit = []
     right_fit = []
     for line in lines:
-        for x1,y1,x2,y2 in line:
-            fit = np.polyfit((x1,x2),(y1,y2),1)
+        for x1, y1, x2, y2 in line:
+            # Check if any of the points are None
+            if any(p is None for p in [x1, y1, x2, y2]):
+                continue
+            fit = np.polyfit((x1, x2), (y1, y2), 1)
             slope = fit[0]
             intercept = fit[1]
-            # print(intercept,slope)
             if slope < -lower_value_slope and slope >= -higher_value_slope:
                 left_fit.append((slope, intercept))
-            elif slope >= lower_value_slope and slope <= higher_value_slope :
-                right_fit.append((slope,intercept))
-    if left_fit == []:
-        # left_fit = np.array([(0.0001,0.0001)])
+            elif slope >= lower_value_slope and slope <= higher_value_slope:
+                right_fit.append((slope, intercept))
+
+    if not left_fit:
         flag_left = False
-    if right_fit == []:
-        # right_fit = np.array([(0.0001,0.0001)])
+    if not right_fit:
         flag_right = False
 
     if flag_left:
-        left_fit_average = np.average(left_fit,axis=0)
+        left_fit_average = np.average(left_fit, axis=0)
         left_line = make_points(img, left_fit_average)
     else:
-        left_line = np.array([[None,None,None,None]])
+        left_line = np.array([[None, None, None, None]])
 
     if flag_right:
-        right_fit_average = np.average(right_fit,axis=0)
+        right_fit_average = np.average(right_fit, axis=0)
         right_line = make_points(img, right_fit_average)
     else:
-        right_line = np.array([[None,None,None,None]])
+        right_line = np.array([[None, None, None, None]])
 
     if flag_left and flag_right:
-        center_line = np.array([[0,0,0,0]])
+        center_line = np.array([[0, 0, 0, 0]])
         for i in range(4):
-            center_line[0][i] = np.int32((left_line[0][i] + right_line[0][i])/2)
+            center_line[0][i] = np.int32((left_line[0][i] + right_line[0][i]) / 2)
     else:
-        center_line = np.array([[None,None,None,None]])
+        center_line = np.array([[None, None, None, None]])
 
-    average_lines = [np.array(left_line),np.array(right_line),np.array(center_line)]
+    average_lines = [np.array(left_line), np.array(right_line), np.array(center_line)]
     return average_lines
+
 
 def update_line_history(line_history, new_line, history_length=5):
     if new_line[0].all() == np.array([None,None,None,None]).all() and line_history:
@@ -420,7 +471,7 @@ def detection():
 
                     for *xyxy, _, _ in det:
                         indv_mask = np.zeros_like(im0_masked)
-                        cv2.imshow("Masks", indv_mask)
+                        # cv2.imshow("Masks", indv_mask)
 
                         # Draw bounding boxes on the zero mask image
                         cv2.rectangle(indv_mask, (int(xyxy[0]), int(xyxy[1])), (int(xyxy[2]), int(xyxy[3])), (255, 255, 255), -1)
