@@ -18,17 +18,17 @@ import warnings
 # warnings.filterwarnings("ignore")
 
 # Open the serial port that your Arduino is connected to (e.g., COM3 on Windows, /dev/ttyUSB0 on Linux, /dev/tty.usbserial on MacOS).
-ser = serial.Serial('/dev/tty.usbmodem1401', 9600)  # Adjust this to match your connection
-def send_value(value):
-    ser.write(str(value).encode())  # Convert the integer to a string and encode it to bytes
-    ser.flush()
+# ser = serial.Serial('/dev/tty.usbmodem1401', 9600)  # Adjust this to match your connection
+# def send_value(value):
+#     ser.write(str(value).encode())  # Convert the integer to a string and encode it to bytes
+#     ser.flush()
     # time.sleep(0.01) # Wait a bit for the Arduino to process the information
 
-# Read response
-def recieve_value():
-    if ser.in_waiting > 0:
-        ser_line = ser.readline().decode().strip()
-        print(f"Arduino responded with: {ser_line}")
+# # Read response
+# def recieve_value():
+#     if ser.in_waiting > 0:
+#         ser_line = ser.readline().decode().strip()
+#         print(f"Arduino responded with: {ser_line}")
 # capture = cv2.VideoCapture(0)
 # capture = cv2.VideoCapture('/Users/anavart.pandya/MY DRIVE D/Autonomous Vehicles Sem8 IITGN/Advanced-Lane-Lines-master/vid2.mp4')
 
@@ -319,7 +319,7 @@ class PIDController:
 #     pwm_queue.put(new_value)  # Place the new PWM value in the queue
 
 # capture = cv2.VideoCapture('/Users/anavart.pandya/MY DRIVE D/Autonomous Vehicles Sem8 IITGN/Advanced-Lane-Lines-master/vid2.mp4')
-capture = cv2.VideoCapture(0)
+capture = cv2.VideoCapture(1)
 # desired_fps = 15
 # fps = capture.get(cv2.CAP_PROP_FPS)
 # frame_start_pos = 90
@@ -427,13 +427,13 @@ while True:
         pwm_text = "PWM: {:.2f}".format(pwm_value)
         cv2.putText(line_image_2_filled, pwm_text, (25, int(original_height*(2/5))), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)
 
-        send_value(int(pwm_value))
-        recieve_value()
+        # send_value(int(pwm_value))
+        # recieve_value()
     except:
         line_image_2_filled = frame
         pwm_value = 0 
-        send_value(int(pwm_value))
-        recieve_value()
+        # send_value(int(pwm_value))
+        # recieve_value()
     # Start PWM sending in a separate thread
     # send_value(int(pwm_value))
     # threading.Thread(target=send_value, args=(pwm_value,), daemon=True).start()
@@ -452,10 +452,10 @@ while True:
     #     break
     if cv2.waitKey(25) & 0xFF == ord('q'):  # Press 'q' to exit
         print(counter)
-        ser.close()  # Close the serial port
+        # ser.close()  # Close the serial port
         break
 cv2.destroyAllWindows()
-ser.close()  # Close the serial port
+# ser.close()  # Close the serial port
 
 # Close the redirected stderr (optional, depends on your script's structure)
 # sys.stderr.close()

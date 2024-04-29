@@ -21,10 +21,11 @@ import time
 
 ser = serial.Serial('COM8', 9600)
 
+stop_distance = 5
 
-frame = cv2.imread('obstacledetection/yolov7modified/snakeroad.jpg')  # Replace 'your_image.jpg' with the path to your image
+frame = cv2.imread('obstacledetection/yolov7modified/ca_road.jpg')  # Replace 'your_image.jpg' with the path to your image
 # cv2.imshow("frame",frame)
-# frame = cv2.resize(frame, (640, 480))
+frame = cv2.resize(frame, (640, 480))
 
 def canny(img):
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -400,10 +401,8 @@ def detection():
             # if color_frame is not None:
             #     color_image = color_image.reshape((480, 640, 3))
 
-
-            lane_masked_image = lane_detection(img)   #for live frame
-            # lane_masked_image = lane_detection(frame) #for fixed frame
-            
+            # lane_masked_image = lane_detection(img)   #for live frame
+            lane_masked_image = lane_detection(frame) #for fixed frame
             
             # cv2.imshow("color frame", color_frame)
 
@@ -448,6 +447,12 @@ def detection():
             pred = non_max_suppression(pred, opt.conf_thres, opt.iou_thres, classes=opt.classes, agnostic=opt.agnostic_nms)
             t3 = time_synchronized()
 
+            # print(len(pred[0]))
+
+            if len(pred[0])==0:
+                print("Path is clear!! (No obstacles)")
+                ser.write(b'go\n')
+
             # Process detections
             for i, det in enumerate(pred):  # detections per image
 
@@ -479,8 +484,12 @@ def detection():
                         cv2.rectangle(indv_mask, (int(xyxy[0]), int(xyxy[1])), (int(xyxy[2]), int(xyxy[3])), (255, 255, 255), -1)
                         
                         # Check for intersection only if both images are non-empty
-                        if lane_masked_image.size != 0 and indv_mask.size != 0:
-                            intersection, intersects = check_intersection(lane_masked_image, indv_mask)
+                        # if lane_masked_image.size != 0 and indv_mask.size != 0:
+                        intersection, intersects = check_intersection(lane_masked_image, indv_mask)
+
+                        # else:
+                        #     intersection = np.zeros_like(im0_masked)
+                        #     intersects = False
 
                         # Display the stacked image
                         cv2.imshow("Intersection", intersection)
@@ -508,11 +517,15 @@ def detection():
 
                                 # Add the distance to the list
 
+                        else:
+                            print("Path is clear!!")
+                            ser.write(b'go\n')
+
                     # After iterating through all detected objects, find the minimum distance
                     if object_distances:
                         min_distance = min(object_distances)
                     # Check if the minimum distance is less than a threshold
-                        if min_distance < 5:
+                        if min_distance < stop_distance:
                             print(f"Obstacle detected within {min_distance:.2f} meters!")
                             ser.write(b'stop\n')
                         else:
