@@ -384,11 +384,13 @@ def detection():
             # aligned_frames = align.process(frames)
             aligned_frames=pipeline.wait_for_frames()
             color_frame = aligned_frames.get_color_frame()
+            lane_frame = aligned_frames.get_color_frame()
             depth_frame = aligned_frames.get_depth_frame()
             # if not depth_frame or not color_frame:
             #     continue
 
             img = np.asanyarray(color_frame.get_data())
+            lane = np.asanyarray(lane_frame.get_data())
             # depth_image = np.asanyarray(depth_frame.get_data())
             # depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha=0.5), cv2.COLORMAP_JET)
             colorized_frame = colorizer.colorize(depth_frame)
@@ -554,7 +556,7 @@ if __name__ == '__main__':
     parser.add_argument('--weights', nargs='+', type=str, default='yolov7-tiny.pt', help='model.pt path(s)')
     parser.add_argument('--source', type=str, default='inference/images', help='source')  # file/folder, 0 for webcam
     parser.add_argument('--img-size', type=int, default=640, help='inference size (pixels)')
-    parser.add_argument('--conf-thres', type=float, default=0.25, help='object confidence threshold')
+    parser.add_argument('--conf-thres', type=float, default=0.45, help='object confidence threshold')
     parser.add_argument('--iou-thres', type=float, default=0.45, help='IOU threshold for NMS')
     parser.add_argument('--device', default='', help='cuda device, i.e. 0 or 0,1,2,3 or cpu')
     parser.add_argument('--view-img', action='store_true', help='display results')
