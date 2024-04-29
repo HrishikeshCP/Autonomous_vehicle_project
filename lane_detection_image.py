@@ -2,8 +2,8 @@ import cv2
 import numpy as np
 
 # Load the image
-frame = cv2.imread('obstacledetection/yolov7modified/final road (Custom).jpg')  # Replace 'your_image.jpg' with the path to your image
-
+frame = cv2.imread('obstacledetection/yolov7modified/ca_road.jpg')  # Replace 'your_image.jpg' with the path to your image
+frame = cv2.resize(frame, (640, 480))
 
 def canny(img):
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
