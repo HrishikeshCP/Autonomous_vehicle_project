@@ -24,7 +24,7 @@ ser = serial.Serial('COM8', 9600)
 
 frame = cv2.imread('obstacledetection/yolov7modified/snakeroad.jpg')  # Replace 'your_image.jpg' with the path to your image
 # cv2.imshow("frame",frame)
-frame = cv2.resize(frame, (640, 480))
+# frame = cv2.resize(frame, (640, 480))
 
 def canny(img):
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -401,8 +401,8 @@ def detection():
             #     color_image = color_image.reshape((480, 640, 3))
 
 
-            # lane_masked_image = lane_detection(img)   #for live frame
-            lane_masked_image = lane_detection(frame) #for fixed frame
+            lane_masked_image = lane_detection(img)   #for live frame
+            # lane_masked_image = lane_detection(frame) #for fixed frame
             
             
             # cv2.imshow("color frame", color_frame)
