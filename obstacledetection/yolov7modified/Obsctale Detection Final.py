@@ -29,7 +29,8 @@ def canny(img):
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     kernel = 7
     blur = cv2.GaussianBlur(gray, (kernel, kernel), sigmaX=0, sigmaY=0)
-    canny = cv2.Canny(blur, 100, 160)
+    canny = cv2.Canny(blur,80,100)
+    # canny = cv2.Canny(blur,100,160)
     return canny
 
 
@@ -37,18 +38,32 @@ def region_of_interest_trapezium(img):
     height = img.shape[0]
     width = img.shape[1]
     mask = np.zeros_like(img)
+
+    # Define coordinates for the trapezium
+    # Adjust the points (x1, y1), (x2, y2), (x3, y3), (x4, y4) as needed
     bottom_left = (0, height)
     top_left = (0, height * 0.5)
     top_right = (width, height * 0.5)
     bottom_right = (width, height)
+
+    # bottom_left = (width * 0.1, height)
+    # top_left = (width * 0.4, height * 0.6)
+    # top_right = (width * 0.6, height * 0.6)
+    # bottom_right = (width * 0.9, height)
+
+    # np.array expects points as [[first_point, second_point, third_point, fourth_point]]
     trapezium = np.array([[bottom_left, top_left, top_right, bottom_right]], np.int32)
+
+    # Fill the polygon (trapezium here) with white (255)
     cv2.fillPoly(mask, [trapezium], 255)
+
+    # Apply the mask
     masked_image = cv2.bitwise_and(img, mask)
     return masked_image
 
 
 def houghLines(img):
-    houghLines = cv2.HoughLinesP(img, 2, np.pi / 180, 10, np.array([]), minLineLength=15, maxLineGap=5)
+    houghLines = cv2.HoughLinesP(img, 2, np.pi / 180, 10, np.array([]), minLineLength=40, maxLineGap=5)
     return houghLines
 
 
@@ -75,8 +90,8 @@ def display_filled_region(img, lines, init_point):
         # image = cv2.fillPoly(img_copy, [pts], (144, 238, 144))  # Light green color
         # image = cv2.fillPoly(img_copy, [pts2], (144, 238, 144))  # Light green color
         
-        image = cv2.polylines(img_copy, [pts], isClosed=True, color=(144, 238, 144), thickness=2)
-        image = cv2.polylines(img_copy, [pts2], isClosed=True, color=(144, 238, 144), thickness=2) 
+        image = cv2.polylines(img_copy, [pts], isClosed=True, color=(144, 238, 144), thickness=5)
+        image = cv2.polylines(img_copy, [pts2], isClosed=True, color=(144, 238, 144), thickness=5) 
 
     return image
 
@@ -90,57 +105,105 @@ def make_points(img, lineSI):
     x2 = int((y2 - intercept) / slope)
     return [[x1, y1, x2, y2]]
 
-
-def average_slope_intercept_with_centre(img, lines):
+def average_slope_intercept(img,lines):
+    # lower_value_slope = 0.5
+    # higher_value_slope = 3
     lower_value_slope = 0.5
-    higher_value_slope = 2
+    higher_value_slope = 2.5
     flag_left = True
     flag_right = True
     left_fit = []
     right_fit = []
     for line in lines:
-        for x1, y1, x2, y2 in line:
-            fit = np.polyfit((x1, x2), (y1, y2), 1)
+        for x1,y1,x2,y2 in line:
+            fit = np.polyfit((x1,x2),(y1,y2),1)
             slope = fit[0]
             intercept = fit[1]
+            # print(intercept,slope)
             if slope < -lower_value_slope and slope >= -higher_value_slope:
                 left_fit.append((slope, intercept))
-            elif slope >= lower_value_slope and slope <= higher_value_slope:
-                right_fit.append((slope, intercept))
+            elif slope >= lower_value_slope and slope <= higher_value_slope :
+                right_fit.append((slope,intercept))
     if left_fit == []:
+        # left_fit = np.array([(0.0001,0.0001)])
         flag_left = False
     if right_fit == []:
+        # right_fit = np.array([(0.0001,0.0001)])
         flag_right = False
 
     if flag_left:
-        left_fit_average = np.average(left_fit, axis=0)
+        left_fit_average = np.average(left_fit,axis=0)
         left_line = make_points(img, left_fit_average)
     else:
-        left_line = np.array([[None, None, None, None]])
+        left_line = np.array([[None,None,None,None]])
 
     if flag_right:
-        right_fit_average = np.average(right_fit, axis=0)
+        right_fit_average = np.average(right_fit,axis=0)
         right_line = make_points(img, right_fit_average)
     else:
-        right_line = np.array([[None, None, None, None]])
+        right_line = np.array([[None,None,None,None]])
+
+
+    average_lines = [np.array(left_line),np.array(right_line)]
+    return average_lines
+
+
+def average_slope_intercept_with_centre(img, lines):
+    # lower_value_slope = 0.5
+    # higher_value_slope = 3
+    lower_value_slope = 0.5
+    higher_value_slope = 2.5
+    flag_left = True
+    flag_right = True
+    left_fit = []
+    right_fit = []
+    for line in lines:
+        for x1,y1,x2,y2 in line:
+            fit = np.polyfit((x1,x2),(y1,y2),1)
+            slope = fit[0]
+            intercept = fit[1]
+            # print(intercept,slope)
+            if slope < -lower_value_slope and slope >= -higher_value_slope:
+                left_fit.append((slope, intercept))
+            elif slope >= lower_value_slope and slope <= higher_value_slope :
+                right_fit.append((slope,intercept))
+    if left_fit == []:
+        # left_fit = np.array([(0.0001,0.0001)])
+        flag_left = False
+    if right_fit == []:
+        # right_fit = np.array([(0.0001,0.0001)])
+        flag_right = False
+
+    if flag_left:
+        left_fit_average = np.average(left_fit,axis=0)
+        left_line = make_points(img, left_fit_average)
+    else:
+        left_line = np.array([[None,None,None,None]])
+
+    if flag_right:
+        right_fit_average = np.average(right_fit,axis=0)
+        right_line = make_points(img, right_fit_average)
+    else:
+        right_line = np.array([[None,None,None,None]])
 
     if flag_left and flag_right:
-        center_line = np.array([[0, 0, 0, 0]])
+        center_line = np.array([[0,0,0,0]])
         for i in range(4):
-            center_line[0][i] = np.int32((left_line[0][i] + right_line[0][i]) / 2)
+            center_line[0][i] = np.int32((left_line[0][i] + right_line[0][i])/2)
     else:
-        center_line = np.array([[None, None, None, None]])
+        center_line = np.array([[None,None,None,None]])
 
-    average_lines_with_centre = [np.array(left_line), np.array(right_line), np.array(center_line)]
-    return average_lines_with_centre
-
+    average_lines = [np.array(left_line),np.array(right_line),np.array(center_line)]
+    return average_lines
 
 def update_line_history(line_history, new_line, history_length=5):
-    if new_line[0].all() == np.array([None, None, None, None]).all() and line_history:
+    if new_line[0].all() == np.array([None,None,None,None]).all() and line_history:
+        # Use the most recent valid line if the new line is invalid
         new_line = line_history[-1]
     line_history.append(new_line)
     if len(line_history) > history_length:
         line_history.pop(0)
+    # print(line_history)
     return line_history
 
 
@@ -161,7 +224,7 @@ def lane_detection(frame):
         canny_output = canny(frame)
         masked_output = region_of_interest_trapezium(canny_output)
         lines = houghLines(masked_output)
-
+        average_lines = average_slope_intercept(frame,lines)
         average_lines_with_centre_avg = average_slope_intercept_with_centre(frame, lines)
 
         left_line = average_lines_with_centre_avg[0]
