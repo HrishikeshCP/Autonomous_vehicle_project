@@ -10,6 +10,7 @@ import time
 
 # Load the trained model 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+print(device)
 model = SegformerForSemanticSegmentation.from_pretrained('nvidia/segformer-b2-finetuned-ade-512-512')
 
 # Replace with the actual number of classes
