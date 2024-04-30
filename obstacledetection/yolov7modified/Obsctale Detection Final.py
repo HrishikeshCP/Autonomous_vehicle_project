@@ -23,9 +23,9 @@ ser = serial.Serial('COM8', 9600)
 
 stop_distance = 5
 
-frame = cv2.imread('obstacledetection/yolov7modified/ca_road.jpg')  # Replace 'your_image.jpg' with the path to your image
+frame = cv2.imread('obstacledetection/yolov7modified/snakeroad.jpg')  # Replace 'your_image.jpg' with the path to your image
 # cv2.imshow("frame",frame)
-frame = cv2.resize(frame, (640, 480))
+# frame = cv2.resize(frame, (640, 480))
 
 def canny(img):
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -65,8 +65,29 @@ def region_of_interest_trapezium(img):
 
 
 def houghLines(img):
-    houghLines = cv2.HoughLinesP(img, 2, np.pi / 180, 10, np.array([]), minLineLength=40, maxLineGap=5)
+    houghLines = cv2.HoughLinesP(img, 2, np.pi / 180, 10, np.array([]), minLineLength=30, maxLineGap=10)
     return houghLines
+
+def preprocess_frame(frame):
+    # new_width = 640
+    # new_height = 480
+    # aspect_ratio = original_width / original_height
+    # # Calculate the new height maintaining the aspect ratio
+    # new_height = int(new_width / aspect_ratio)
+    # frame = cv2.resize(frame, (new_width, new_height))
+    # Convert frame to float
+    frame_float = frame.astype(np.float32)
+    # Calculate the mean of the pixel values
+    mean = np.mean(frame_float)
+    # Scale factor for contrast adjustment; values < 1.0 decrease contrast
+    # scale_factor = 1.0
+    scale_factor = 0.8
+    # Adjust the contrast
+    # Moving pixel values towards the mean to reduce contrast
+    frame_adjusted = (frame_float - mean) * scale_factor + mean
+    # Clip values to stay between 0 and 255 and convert back to uint8
+    frame = np.clip(frame_adjusted, 0, 255).astype(np.uint8)
+    return frame
 
 
 def display_filled_region(img, lines, init_point):
@@ -89,11 +110,11 @@ def display_filled_region(img, lines, init_point):
         pts2 = pts2.reshape((-1, 1, 2))
 
         pts = pts.reshape((-1, 1, 2))
-        # image = cv2.fillPoly(img_copy, [pts], (144, 238, 144))  # Light green color
-        # image = cv2.fillPoly(img_copy, [pts2], (144, 238, 144))  # Light green color
+        image = cv2.fillPoly(img_copy, [pts], (144, 238, 144))  # Light green color
+        image = cv2.fillPoly(img_copy, [pts2], (144, 238, 144))  # Light green color
         
-        image = cv2.polylines(img_copy, [pts], isClosed=True, color=(144, 238, 144), thickness=5)
-        image = cv2.polylines(img_copy, [pts2], isClosed=True, color=(144, 238, 144), thickness=5) 
+        # image = cv2.polylines(img_copy, [pts], isClosed=True, color=(144, 238, 144), thickness=5)
+        # image = cv2.polylines(img_copy, [pts2], isClosed=True, color=(144, 238, 144), thickness=5) 
 
     return image
 
@@ -267,6 +288,7 @@ def average_line_from_history(line_history):
 
 
 def lane_detection(frame):
+    mask = frame.copy()
     left_line_history = []
     right_line_history = []
     history_length = 100
@@ -294,11 +316,13 @@ def lane_detection(frame):
             [np.array(left_line_avg), np.array(right_line_avg), np.array(center_line_avg)])
 
         line_image_2_filled = display_filled_region(frame, average_lines_with_centre_avg, init_point)
+        line_mask_filled = display_filled_region(mask, average_lines_with_centre_avg, init_point)
     except Exception as e:
         print("Error:", e)
         line_image_2_filled = frame
+        line_mask_filled = frame
 
-    return line_image_2_filled
+    return line_image_2_filled, line_mask_filled
 
 def check_intersection(masked_img1, masked_img2):
     # Resize masked_img2 to match the dimensions of masked_img1
@@ -401,8 +425,10 @@ def detection():
             # if color_frame is not None:
             #     color_image = color_image.reshape((480, 640, 3))
 
-            # lane_masked_image = lane_detection(img)   #for live frame
-            lane_masked_image = lane_detection(frame) #for fixed frame
+            img = preprocess_frame(img)
+            lane_image, lane_masked_image = lane_detection(img)   #for live frame
+            # lane_img = preprocess_frame(frame)
+            # lane_masked_image = lane_detection(lane_img) #for fixed frame
             
             # cv2.imshow("color frame", color_frame)
 
@@ -548,7 +574,7 @@ def detection():
                     break
 
             # Display images for debugging
-            cv2.imshow("Lane Masked Image", lane_masked_image)
+            cv2.imshow("Lane Masked Image", lane_image)
             # cv2.imshow("Obstacle Masked Image", im0_masked)
 
             # Check if any of the images are empty
