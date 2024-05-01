@@ -291,7 +291,7 @@ def lane_detection(frame):
     mask = frame.copy()
     left_line_history = []
     right_line_history = []
-    history_length = 100
+    history_length = 15
     init_point = (23, 384)
 
     try:
