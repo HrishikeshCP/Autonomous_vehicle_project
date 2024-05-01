@@ -15,7 +15,7 @@ String received_data = "";
 int brake_active = 0;
 int maxspeed = 255;
 float currentspeed=0;
-float increment = 150;
+float increment = 40;
 int go_count = 0;
 int max_go_count = 0;
 
@@ -94,7 +94,6 @@ void loop() {
 // Remote Control Code
 //
 //    digitalWrite(2,HIGH);
-//    
 //    ch3 = pulseIn(3,HIGH);
 //    if (ch3<990){
 //      motor.stop();
