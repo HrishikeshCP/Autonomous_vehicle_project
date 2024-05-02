@@ -18,10 +18,11 @@ import numpy as np
 
 import serial
 import time
+from pyfirmata import Arduino, util
+
 
 import warnings
 warnings.filterwarnings("ignore", category=np.RankWarning)
-
 
 ser = serial.Serial('COM8', 9600)
 
@@ -30,6 +31,11 @@ stop_distance = 5
 frame = cv2.imread('obstacledetection/yolov7modified/snakeroad.jpg')  # Replace 'your_image.jpg' with the path to your image
 # cv2.imshow("frame",frame)
 # frame = cv2.resize(frame, (640, 480))
+
+def cleanup_resources(pipeline):
+    cv2.destroyAllWindows()
+    if pipeline:
+        pipeline.stop()
 
 def canny(img):
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -343,6 +349,8 @@ def check_intersection(masked_img1, masked_img2):
 
 
 def detection():
+    board = Arduino('COM8')
+    pipeline = None
     try:
         colorizer = rs.colorizer()
         colorizer.set_option(rs.option.visual_preset, 1)
@@ -400,8 +408,9 @@ def detection():
         # align = rs.align(align_to)
 
         # Set colorizer options
-
+    
         while True:
+
             # frames = pipeline.wait_for_frames()
             # color_frame = frames.get_color_frame()
 
@@ -484,7 +493,8 @@ def detection():
 
             if len(pred[0])==0:
                 print("Path is clear!! (No obstacles)")
-                ser.write(b'go\n')
+                # ser.write(b'go\n')
+                board.write('go'.encode())
 
             # Process detections
             for i, det in enumerate(pred):  # detections per image
@@ -552,7 +562,8 @@ def detection():
 
                         else:
                             print("Path is clear!!")
-                            ser.write(b'go\n')
+                            # ser.write(b'go\n')
+                            board.write('go'.encode())
 
                     # After iterating through all detected objects, find the minimum distance
                     if object_distances:
@@ -560,14 +571,17 @@ def detection():
                     # Check if the minimum distance is less than a threshold
                         if min_distance < stop_distance:
                             print(f"Obstacle detected within {min_distance:.2f} meters!")
-                            ser.write(b'stop\n')
+                            # ser.write(b'stop\n')
+                            board.write('stop'.encode())
                         else:
                             print("Path is clear!!")
-                            ser.write(b'go\n')
+                            # ser.write(b'go\n')
+                            board.write('go'.encode())
                         # print(f"The minimum distance among all detected objects is: {min_distance:.2f} meters")
                     else:
                         print("No objects detected.")
-                        ser.write(b'go\n')
+                        # ser.write(b'go\n')
+                        board.write('go'.encode())
 
                 # Print time (inference + NMS)
                 #print(f'{s}Done. ({(1E3 * (t2 - t1)):.1f}ms) Inference, ({(1E3 * (t3 - t2)):.1f}ms) NMS')
@@ -581,7 +595,7 @@ def detection():
                     break
 
             # Display images for debugging
-            cv2.imshow("Lane Masked Image", lane_image)
+            # cv2.imshow("Lane Masked Image", lane_image)
             # cv2.imshow("Obstacle Masked Image", im0_masked)
 
             # Check if any of the images are empty
@@ -594,7 +608,10 @@ def detection():
                 break
 
     finally:
-        cv2.destroyAllWindows()
+        cleanup_resources(pipeline)
+        # cv2.destroyAllWindows()
+    
+    board.exit()
 
 
 if __name__ == '__main__':
