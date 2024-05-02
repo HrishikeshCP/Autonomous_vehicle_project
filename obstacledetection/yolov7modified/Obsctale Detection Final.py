@@ -33,7 +33,7 @@ warnings.filterwarnings("ignore", category=np.RankWarning)
 
 ser = serial.Serial('COM8', 9600)
 
-stop_distance = 5
+stop_distance = 4
 
 frame = cv2.imread('obstacledetection/yolov7modified/snakeroad.jpg')  # Replace 'your_image.jpg' with the path to your image
 # cv2.imshow("frame",frame)
@@ -500,7 +500,7 @@ def detection():
 
             if len(pred[0])==0:
                 print("Path is clear!! (No obstacles)")
-                ser.write(b'go\n')
+                ser.write(b'stoop\n')
                 # board.write('go'.encode())
 
             # Process detections
@@ -569,7 +569,7 @@ def detection():
 
                         else:
                             print("Path is clear!!")
-                            ser.write(b'go\n')
+                            ser.write(b'stoop\n')
                             # board.write('go'.encode())
 
                     # After iterating through all detected objects, find the minimum distance
@@ -582,12 +582,12 @@ def detection():
                             # board.write('stop'.encode())
                         else:
                             print("Path is clear!!")
-                            ser.write(b'go\n')
+                            ser.write(b'stoop\n')
                             # board.write('go'.encode())
                         # print(f"The minimum distance among all detected objects is: {min_distance:.2f} meters")
                     else:
                         print("No objects detected.")
-                        ser.write(b'go\n')
+                        ser.write(b'stoop\n')
                         # board.write('go'.encode())
 
                 # Print time (inference + NMS)
@@ -602,7 +602,7 @@ def detection():
                     break
 
             # Display images for debugging
-            # cv2.imshow("Lane Masked Image", lane_image)
+            cv2.imshow("Lane Masked Image", lane_image)
             # cv2.imshow("Obstacle Masked Image", im0_masked)
 
             # Check if any of the images are empty
@@ -622,7 +622,7 @@ def detection():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    # app.run(debug=True)
     parser = argparse.ArgumentParser()
     parser.add_argument('--weights', nargs='+', type=str, default='yolov7-tiny.pt', help='model.pt path(s)')
     parser.add_argument('--source', type=str, default='inference/images', help='source')  # file/folder, 0 for webcam
