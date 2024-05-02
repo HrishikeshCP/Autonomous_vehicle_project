@@ -20,11 +20,18 @@ import serial
 import time
 from pyfirmata import Arduino, util
 
+from flask import Flask, render_template
+
+app = Flask(__name__)
+
+@app.route('/')
+def index():
+    return render_template('index.html')
 
 import warnings
 warnings.filterwarnings("ignore", category=np.RankWarning)
 
-ser = serial.Serial('COM8', 9600)
+# ser = serial.Serial('COM8', 9600)
 
 stop_distance = 5
 
@@ -615,6 +622,7 @@ def detection():
 
 
 if __name__ == '__main__':
+    app.run(debug=True)
     parser = argparse.ArgumentParser()
     parser.add_argument('--weights', nargs='+', type=str, default='yolov7-tiny.pt', help='model.pt path(s)')
     parser.add_argument('--source', type=str, default='inference/images', help='source')  # file/folder, 0 for webcam
