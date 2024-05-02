@@ -19,6 +19,10 @@ import numpy as np
 import serial
 import time
 
+import warnings
+warnings.filterwarnings("ignore", category=np.RankWarning)
+
+
 ser = serial.Serial('COM8', 9600)
 
 stop_distance = 5
@@ -250,20 +254,23 @@ def average_slope_intercept_with_centre(img, lines):
         left_fit_average = np.average(left_fit, axis=0)
         left_line = make_points(img, left_fit_average)
     else:
-        left_line = np.array([[None, None, None, None]])
+        # left_line = np.array([[None, None, None, None]])
+        left_line = np.array([])
 
     if flag_right:
         right_fit_average = np.average(right_fit, axis=0)
         right_line = make_points(img, right_fit_average)
     else:
-        right_line = np.array([[None, None, None, None]])
+        # right_line = np.array([[None, None, None, None]])
+        right_line = np.array([])
 
     if flag_left and flag_right:
         center_line = np.array([[0, 0, 0, 0]])
         for i in range(4):
             center_line[0][i] = np.int32((left_line[0][i] + right_line[0][i]) / 2)
     else:
-        center_line = np.array([[None, None, None, None]])
+        # center_line = np.array([[None, None, None, None]])
+        center_line = np.array([])
 
     average_lines = [np.array(left_line), np.array(right_line), np.array(center_line)]
     return average_lines
@@ -518,7 +525,7 @@ def detection():
                         #     intersects = False
 
                         # Display the stacked image
-                        cv2.imshow("Intersection", intersection)
+                        # cv2.imshow("Intersection", intersection)
                         
                         if intersects:
                             c = int(cls)  # integer class
@@ -566,7 +573,7 @@ def detection():
                 #print(f'{s}Done. ({(1E3 * (t2 - t1)):.1f}ms) Inference, ({(1E3 * (t3 - t2)):.1f}ms) NMS')
 
                 # Stream results
-                cv2.imshow("Recognition result", im0)
+                # cv2.imshow("Recognition result", im0)
                 # cv2.imshow("Recognition result depth",depth_colormap)
                 # cv2.imshow("Masked frame", im0_masked)  # Display the masked image
 
