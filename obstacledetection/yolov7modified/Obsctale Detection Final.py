@@ -31,7 +31,7 @@ def index():
 import warnings
 warnings.filterwarnings("ignore", category=np.RankWarning)
 
-# ser = serial.Serial('COM8', 9600)
+ser = serial.Serial('COM8', 9600)
 
 stop_distance = 5
 
@@ -356,7 +356,7 @@ def check_intersection(masked_img1, masked_img2):
 
 
 def detection():
-    board = Arduino('COM8')
+    # board = Arduino('COM8')
     pipeline = None
     try:
         colorizer = rs.colorizer()
@@ -500,8 +500,8 @@ def detection():
 
             if len(pred[0])==0:
                 print("Path is clear!! (No obstacles)")
-                # ser.write(b'go\n')
-                board.write('go'.encode())
+                ser.write(b'go\n')
+                # board.write('go'.encode())
 
             # Process detections
             for i, det in enumerate(pred):  # detections per image
@@ -569,8 +569,8 @@ def detection():
 
                         else:
                             print("Path is clear!!")
-                            # ser.write(b'go\n')
-                            board.write('go'.encode())
+                            ser.write(b'go\n')
+                            # board.write('go'.encode())
 
                     # After iterating through all detected objects, find the minimum distance
                     if object_distances:
@@ -578,17 +578,17 @@ def detection():
                     # Check if the minimum distance is less than a threshold
                         if min_distance < stop_distance:
                             print(f"Obstacle detected within {min_distance:.2f} meters!")
-                            # ser.write(b'stop\n')
-                            board.write('stop'.encode())
+                            ser.write(b'stop\n')
+                            # board.write('stop'.encode())
                         else:
                             print("Path is clear!!")
-                            # ser.write(b'go\n')
-                            board.write('go'.encode())
+                            ser.write(b'go\n')
+                            # board.write('go'.encode())
                         # print(f"The minimum distance among all detected objects is: {min_distance:.2f} meters")
                     else:
                         print("No objects detected.")
-                        # ser.write(b'go\n')
-                        board.write('go'.encode())
+                        ser.write(b'go\n')
+                        # board.write('go'.encode())
 
                 # Print time (inference + NMS)
                 #print(f'{s}Done. ({(1E3 * (t2 - t1)):.1f}ms) Inference, ({(1E3 * (t3 - t2)):.1f}ms) NMS')
@@ -618,7 +618,7 @@ def detection():
         cleanup_resources(pipeline)
         # cv2.destroyAllWindows()
     
-    board.exit()
+    # board.exit()
 
 
 if __name__ == '__main__':
@@ -660,15 +660,3 @@ if __name__ == '__main__':
 
     with torch.no_grad():
         detection()
-
-
-from flask import Flask, render_template
-
-app = Flask(__name__)
-
-@app.route('/')
-def index():
-    return render_template('index.html')
-
-if __name__ == '__main__':
-    app.run(debug=True)
