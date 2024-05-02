@@ -1,5 +1,6 @@
 #include <L298N.h>
 #include "CytronMotorDriver.h"
+#include <Firmata.h>
 
 // Pin definition
 const unsigned int IN1 = 7;
@@ -30,6 +31,7 @@ void setup()
   pinMode(4,INPUT);
   pinMode(LED_BUILTIN, OUTPUT);
   Serial.begin(9600);
+  Firmata.begin();
   
 
   while (!Serial)
