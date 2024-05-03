@@ -1,7 +1,7 @@
 import argparse
 import time
 from pathlib import Path
-
+import measure as lidar
 import cv2
 import torch
 import torch.backends.cudnn as cudnn
@@ -81,7 +81,7 @@ def detect(save_img=False):
     while(True):
         #t0 = time.time()
         frames = pipeline.wait_for_frames()
-
+        print(lidar.run('com3'))
         # aligned_frames = align.process(frames)
         aligned_frames=pipeline.wait_for_frames()
         color_frame = aligned_frames.get_color_frame()
