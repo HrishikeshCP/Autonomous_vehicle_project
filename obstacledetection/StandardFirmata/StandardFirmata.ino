@@ -23,6 +23,8 @@
   Last updated August 17th, 2017
 */
 
+#include <L298N.h>
+#include "CytronMotorDriver.h"
 #include <Servo.h>
 #include <Wire.h>
 #include <Firmata.h>
@@ -47,7 +49,18 @@
  * GLOBAL VARIABLES
  *============================================================================*/
 
+const unsigned int IN1 = 7;
+const unsigned int IN2 = 8;
+const unsigned int EN = 9;
+double ch3=1;
+double ch5=1;
 double ch6=1;
+double ch5_old=1000;
+
+
+L298N motor(EN, IN1, IN2);
+
+CytronMD brake_motor(PWM_DIR, 11, 13);  // PWM = Pin 11, DIR = Pin 13.
 
 #ifdef FIRMATA_SERIAL_FEATURE
 SerialFirmata serialFeature;
@@ -121,6 +134,12 @@ byte wireRead(void)
 /*==============================================================================
  * FUNCTIONS
  *============================================================================*/
+
+int mapValue(int value, int fromLow, int fromHigh, int toLow, int toHigh) 
+{
+    float scaledValue = float(value - fromLow) / float(fromHigh - fromLow);
+    return int(scaledValue * (toHigh - toLow) + toLow);
+}
 
 void attachServo(byte pin, int minPulse, int maxPulse)
 {
@@ -758,6 +777,11 @@ void systemResetCallback()
 void setup()
 {
   pinMode(2,INPUT);
+  pinMode(3,INPUT);
+  pinMode(4,INPUT);
+  pinMode(LED_BUILTIN, OUTPUT);
+//  Serial.begin(115200);
+  motor.setSpeed(0);
   
   Firmata.setFirmwareVersion(FIRMATA_FIRMWARE_MAJOR_VERSION, FIRMATA_FIRMWARE_MINOR_VERSION);
 
@@ -829,7 +853,7 @@ void loop()
   serialFeature.update();
 #endif
 }
-  elif (ch6 < 1500) {
+  if (ch6 < 1500) {
     // Remote Control Code
 
       Serial.print("RC Mode: ");

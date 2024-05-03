@@ -36,11 +36,12 @@ com_port = 'COM8'
 
 # ser = serial.Serial(com_port, 9600)
 board = pyfirmata2.Arduino(com_port)
+print('Firmata connection established')
 brake_dir = board.get_pin('d:4:o')  # Example pin setup for 'a'
 brake_pwm = board.get_pin('d:5:p')  # Example pin setup for 'b' as PWM
-accn_1 = board.get_pin('d:5:o')
-accn_2 = board.get_pin('d:5:o')
-accn_pwm = board.get_pin('d:5:p')
+accn_1 = board.get_pin('d:7:o')
+accn_2 = board.get_pin('d:8:o')
+accn_pwm = board.get_pin('d:9:p')
 brake_active = 0
 maxspeed = 255
 currentspeed=0.0
@@ -54,7 +55,7 @@ frame = cv2.imread('obstacledetection/yolov7modified/snakeroad.jpg')  # Replace 
 # cv2.imshow("frame",frame)
 # frame = cv2.resize(frame, (640, 480))
 
-def stop():
+def vehicle_stop():
     go_count = 0
               
     print("stopping vehicle")
@@ -70,7 +71,7 @@ def stop():
     # motor.forward()
     currentspeed = 0
 
-def go():
+def vehicle_go():
     go_count+=1
     if go_count > max_go_count:
         if brake_active == 1:
@@ -555,8 +556,8 @@ def detection():
 
             if len(pred[0])==0:
                 print("Path is clear!! (No obstacles)")
-                ser.write(b'stoop\n')
-                # board.write('go'.encode())
+                vehicle_go()
+                # ser.write(b'stoop\n')
 
             # Process detections
             for i, det in enumerate(pred):  # detections per image
@@ -624,8 +625,8 @@ def detection():
 
                         else:
                             print("Path is clear!!")
-                            ser.write(b'stoop\n')
-                            # board.write('go'.encode())
+                            vehicle_go()
+                            # ser.write(b'stoop\n')
 
                     # After iterating through all detected objects, find the minimum distance
                     if object_distances:
@@ -633,17 +634,17 @@ def detection():
                     # Check if the minimum distance is less than a threshold
                         if min_distance < stop_distance:
                             print(f"Obstacle detected within {min_distance:.2f} meters!")
-                            ser.write(b'stop\n')
-                            # board.write('stop'.encode())
+                            vehicle_stop()
+                            # ser.write(b'stop\n')
                         else:
                             print("Path is clear!!")
-                            ser.write(b'stoop\n')
-                            # board.write('go'.encode())
+                            vehicle_go()
+                            # ser.write(b'stoop\n')
                         # print(f"The minimum distance among all detected objects is: {min_distance:.2f} meters")
                     else:
                         print("No objects detected.")
-                        ser.write(b'stoop\n')
-                        # board.write('go'.encode())
+                        vehicle_go()
+                        # ser.write(b'stoop\n')
 
                 # Print time (inference + NMS)
                 #print(f'{s}Done. ({(1E3 * (t2 - t1)):.1f}ms) Inference, ({(1E3 * (t3 - t2)):.1f}ms) NMS')
