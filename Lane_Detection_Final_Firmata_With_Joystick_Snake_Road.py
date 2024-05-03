@@ -470,7 +470,7 @@ counter = 0
 
 close_all = False
 
-pid_controller = PIDController(Kp=200, Ki=6.0, Kd=200000, max_output=255, min_output=-255)
+pid_controller = PIDController(Kp=300, Ki=6.0, Kd=150000, max_output=255, min_output=-255)
 
 previous_time = cv2.getTickCount()
 # ch1_previous = 1498
