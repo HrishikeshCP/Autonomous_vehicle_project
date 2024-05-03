@@ -18,7 +18,7 @@ int maxspeed = 255;
 float currentspeed=0;
 float increment = 40;
 int go_count = 0;
-int max_go_count = 10;
+int max_go_count = 0;
 
 L298N motor(EN, IN1, IN2);
 
@@ -30,8 +30,8 @@ void setup()
   pinMode(3,INPUT);
   pinMode(4,INPUT);
   pinMode(LED_BUILTIN, OUTPUT);
-  Serial.begin(9600);
-  Firmata.begin();
+  Serial.begin(115200);
+//  Firmata.begin();
   
 
   while (!Serial)

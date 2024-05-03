@@ -15,7 +15,7 @@ String received_data = "";
 int brake_active = 0;
 int maxspeed = 255;
 float currentspeed=0;
-float increment = 40;
+float increment = 10;
 int go_count = 0;
 int max_go_count = 0;
 
@@ -49,7 +49,7 @@ void loop() {
               go_count = 0;
               
               Serial.println("stopping vehicle");
-              brake_motor.setSpeed(180);
+              brake_motor.setSpeed(255);
   //            delay(2000);
   //            brake_motor.setSpeed(0);
               brake_active = 1;
@@ -64,7 +64,8 @@ void loop() {
   //            digitalWrite(LED_BUILTIN, LOW); // Turn the LED off
   //            delay(500); // Wait for 500 milliseconds
           }
-          if (received_data.equals("go")) {
+            else{
+//          if (received_data.equals("stoop")) {
             go_count++;
             if (go_count > max_go_count){
               if (brake_active == 1){
@@ -73,13 +74,15 @@ void loop() {
                 delay(500);
                 brake_motor.setSpeed(0);
                 brake_active = 0;
-                }  
+                }
               if (currentspeed < maxspeed){
                 currentspeed+=increment;
-                if (currentspeed > 250){
-                  currentspeed = 250;
-                }
-                Serial.println(currentspeed);
+                if (currentspeed > maxspeed){
+                  currentspeed = maxspeed;
+              }
+            }
+//                currentspeed = 250;
+//                Serial.println(currentspeed);
                 motor.setSpeed(currentspeed);
                 motor.forward();
                 Serial.print("Speed = ");
@@ -87,7 +90,6 @@ void loop() {
               }
             }
           }
-    }
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
