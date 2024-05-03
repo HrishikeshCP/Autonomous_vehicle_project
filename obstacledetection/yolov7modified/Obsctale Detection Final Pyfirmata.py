@@ -18,7 +18,7 @@ import numpy as np
 
 import serial
 import time
-from pyfirmata import Arduino, util
+from pyfirmata2
 
 from flask import Flask, render_template
 
@@ -32,7 +32,13 @@ import warnings
 warnings.filterwarnings("ignore")
 # warnings.filterwarnings("ignore", category=np.RankWarning)
 
-ser = serial.Serial('COM8', 9600)
+com_port = 'COM8'
+
+# ser = serial.Serial(com_port, 9600)
+board = pyfirmata2.Arduino(com_port)
+brake_dir = board.get_pin('d:4:o')  # Example pin setup for 'a'
+brake_pwm = board.get_pin('d:5:p')  # Example pin setup for 'b' as PWM
+accn_
 
 stop_distance = 4
 
