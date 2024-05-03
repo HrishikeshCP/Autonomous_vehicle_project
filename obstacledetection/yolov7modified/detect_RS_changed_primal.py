@@ -81,7 +81,7 @@ def detect(save_img=False):
     while(True):
         #t0 = time.time()
         frames = pipeline.wait_for_frames()
-        print(lidar.run('com3'))
+        print(lidar.run('com6'))
         # aligned_frames = align.process(frames)
         aligned_frames=pipeline.wait_for_frames()
         color_frame = aligned_frames.get_color_frame()

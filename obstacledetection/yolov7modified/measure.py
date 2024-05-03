@@ -1,8 +1,7 @@
 from rplidar import RPLidar
 
-
-
 def run(PORT_NAME,revs=1):
+
     '''Main function'''
     lidar = RPLidar(PORT_NAME)
     lidar.reset()
@@ -10,7 +9,7 @@ def run(PORT_NAME,revs=1):
     ctr=0
     try:
         # print('Recording measurments... Press Crl+C to stop.')
-        for measurment in lidar.iter_measures():
+        for measurment in lidar.iter_measurments():
         #     line = '\t'.join(str(v) for v in measurment)
         #     outfile.write(line + '\n')
             boolean, quality, angle, distance = measurment  # Unpack values here
@@ -32,4 +31,4 @@ def run(PORT_NAME,revs=1):
     
 
 # if __name__ == '__main__':
-    # run()
+    # run()

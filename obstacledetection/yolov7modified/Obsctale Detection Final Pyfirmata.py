@@ -18,7 +18,7 @@ import numpy as np
 
 import serial
 import time
-from pyfirmata2
+import pyfirmata2
 
 from flask import Flask, render_template
 
@@ -38,13 +38,61 @@ com_port = 'COM8'
 board = pyfirmata2.Arduino(com_port)
 brake_dir = board.get_pin('d:4:o')  # Example pin setup for 'a'
 brake_pwm = board.get_pin('d:5:p')  # Example pin setup for 'b' as PWM
-accn_
+accn_1 = board.get_pin('d:5:o')
+accn_2 = board.get_pin('d:5:o')
+accn_pwm = board.get_pin('d:5:p')
+brake_active = 0
+maxspeed = 255
+currentspeed=0.0
+increment = 10.0
+go_count = 0
+max_go_count = 0
 
 stop_distance = 4
 
 frame = cv2.imread('obstacledetection/yolov7modified/snakeroad.jpg')  # Replace 'your_image.jpg' with the path to your image
 # cv2.imshow("frame",frame)
 # frame = cv2.resize(frame, (640, 480))
+
+def stop():
+    go_count = 0
+              
+    print("stopping vehicle")
+    brake_dir.write(1)
+    brake_pwm.write(1)
+    # brake_motor.setSpeed(255)
+    brake_active = 1
+    
+    accn_pwm.write(0)
+    accn_1.write(1)
+    accn_2.write(0)
+    # motor.setSpeed(0)
+    # motor.forward()
+    currentspeed = 0
+
+def go():
+    go_count+=1
+    if go_count > max_go_count:
+        if brake_active == 1:
+            print("releasing brakes")
+            brake_dir.write(1)
+            brake_pwm.write(1)
+            time.sleep(2)
+            brake_pwm.write(0)
+            brake_active = 0
+        
+        if currentspeed < maxspeed:
+            currentspeed+=increment
+            if currentspeed > maxspeed:
+                currentspeed = maxspeed
+        
+        accn_pwm.write(currentspeed/255)
+        accn_1.write(1)
+        accn_2.write(0)
+        print(f'currentspeed = {currentspeed}')
+
+    
+
 
 def cleanup_resources(pipeline):
     cv2.destroyAllWindows()
