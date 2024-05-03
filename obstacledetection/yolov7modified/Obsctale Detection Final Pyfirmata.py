@@ -671,8 +671,8 @@ def detection():
                 break
 
     finally:
-        cleanup_resources(pipeline)
-        # cv2.destroyAllWindows()
+        # cleanup_resources(pipeline)
+        cv2.destroyAllWindows()
     
     # board.exit()
 
