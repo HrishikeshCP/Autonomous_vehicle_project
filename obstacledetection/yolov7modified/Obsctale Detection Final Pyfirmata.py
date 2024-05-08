@@ -37,8 +37,8 @@ com_port = 'COM8'
 # ser = serial.Serial(com_port, 9600)
 board = pyfirmata2.Arduino(com_port)
 print('Firmata connection established')
-brake_dir = board.get_pin('d:4:o')  # Example pin setup for 'a'
-brake_pwm = board.get_pin('d:5:p')  # Example pin setup for 'b' as PWM
+brake_dir = board.get_pin('d:13:o')  # Example pin setup for 'a'
+brake_pwm = board.get_pin('d:11:p')  # Example pin setup for 'b' as PWM
 accn_1 = board.get_pin('d:7:o')
 accn_2 = board.get_pin('d:8:o')
 accn_pwm = board.get_pin('d:9:p')
@@ -56,6 +56,9 @@ frame = cv2.imread('obstacledetection/yolov7modified/snakeroad.jpg')  # Replace 
 # frame = cv2.resize(frame, (640, 480))
 
 def vehicle_stop():
+    global go_count
+    global brake_active
+    global currentspeed
     go_count = 0
               
     print("stopping vehicle")
@@ -72,13 +75,16 @@ def vehicle_stop():
     currentspeed = 0
 
 def vehicle_go():
+    global go_count
+    global brake_active
+    global currentspeed
     go_count+=1
     if go_count > max_go_count:
         if brake_active == 1:
             print("releasing brakes")
-            brake_dir.write(1)
+            brake_dir.write(0)
             brake_pwm.write(1)
-            time.sleep(2)
+            time.sleep(1)
             brake_pwm.write(0)
             brake_active = 0
         
@@ -650,7 +656,7 @@ def detection():
                 #print(f'{s}Done. ({(1E3 * (t2 - t1)):.1f}ms) Inference, ({(1E3 * (t3 - t2)):.1f}ms) NMS')
 
                 # Stream results
-                # cv2.imshow("Recognition result", im0)
+                cv2.imshow("Recognition result", im0)
                 # cv2.imshow("Recognition result depth",depth_colormap)
                 # cv2.imshow("Masked frame", im0_masked)  # Display the masked image
 

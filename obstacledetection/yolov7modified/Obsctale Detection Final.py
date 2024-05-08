@@ -588,7 +588,7 @@ def detection():
                 #print(f'{s}Done. ({(1E3 * (t2 - t1)):.1f}ms) Inference, ({(1E3 * (t3 - t2)):.1f}ms) NMS')
 
                 # Stream results
-                # cv2.imshow("Recognition result", im0)
+                cv2.imshow("Recognition result", im0)
                 # cv2.imshow("Recognition result depth",depth_colormap)
                 # cv2.imshow("Masked frame", im0_masked)  # Display the masked image
 

@@ -49,52 +49,54 @@ void loop() {
     
     if (ch3<990)
       if (Serial.available()) {
-            received_data = Serial.readStringUntil('\n');
-            
-            if (received_data.equals("stop")) {
-                
-                go_count = 0;
-                
-                Serial.println("stopping vehicle");
-                brake_motor.setSpeed(180);
-    //            delay(2000);
-    //            brake_motor.setSpeed(0);
-                brake_active = 1;
-    
-                motor.setSpeed(0);
-                motor.forward();
-                currentspeed = 0;
-                              
-    //            digitalWrite(LED_BUILTIN, HIGH); // Turn the LED on
-    //            delay(500); // Wait for 500 milliseconds
-    //
-    //            digitalWrite(LED_BUILTIN, LOW); // Turn the LED off
-    //            delay(500); // Wait for 500 milliseconds
-            }
-            if (received_data.equals("go")) {
-              go_count++;
-              if (go_count > max_go_count){
-                if (brake_active == 1){
-                  Serial.println("releasing brake");
-                  brake_motor.setSpeed(-255);
-                  delay(500);
-                  brake_motor.setSpeed(0);
-                  brake_active = 0;
-                  }  
-                if (currentspeed < maxspeed){
-                  currentspeed+=increment;
-                  if (currentspeed > 250){
-                    currentspeed = 250;
-                  }
-                  Serial.println(currentspeed);
-                  motor.setSpeed(currentspeed);
-                  motor.forward();
-                  Serial.print("Speed = ");
-                  Serial.println(motor.getSpeed());
+          received_data = Serial.readStringUntil('\n');
+          
+          if (received_data.equals("stop")) {
+              
+              go_count = 0;
+              
+              Serial.println("stopping vehicle");
+              brake_motor.setSpeed(255);
+  //            delay(2000);
+  //            brake_motor.setSpeed(0);
+              brake_active = 1;
+  
+              motor.setSpeed(0);
+              motor.forward();
+              currentspeed = 0;
+                            
+  //            digitalWrite(LED_BUILTIN, HIGH); // Turn the LED on
+  //            delay(500); // Wait for 500 milliseconds
+  //
+  //            digitalWrite(LED_BUILTIN, LOW); // Turn the LED off
+  //            delay(500); // Wait for 500 milliseconds
+          }
+            else{
+//          if (received_data.equals("stoop")) {
+            go_count++;
+            if (go_count > max_go_count){
+              if (brake_active == 1){
+                Serial.println("releasing brake");
+                brake_motor.setSpeed(-255);
+                delay(500);
+                brake_motor.setSpeed(0);
+                brake_active = 0;
                 }
+              if (currentspeed < maxspeed){
+                currentspeed+=increment;
+                if (currentspeed > maxspeed){
+                  currentspeed = maxspeed;
               }
             }
-      }
+//                currentspeed = 250;
+//                Serial.println(currentspeed);
+                motor.setSpeed(currentspeed);
+                motor.forward();
+                Serial.print("Speed = ");
+                Serial.println(motor.getSpeed());
+              }
+            }
+          }
   }
 ///////////////////////////////////////////////////////////////////////////////////////
   else{
